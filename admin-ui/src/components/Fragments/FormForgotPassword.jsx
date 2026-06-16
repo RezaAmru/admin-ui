@@ -1,9 +1,9 @@
+import { Link } from "react-router-dom";
 import Button from "../Elements/Button.jsx";
 import LabeledInput from "../Elements/LabeledInput.jsx";
 
 function FormForgotPassword({
   errorMessage,
-  onNavigate,
   onSubmit,
   successMessage,
 }) {
@@ -36,13 +36,9 @@ function FormForgotPassword({
       </form>
 
       <div className="mt-6 text-center">
-        <button
-          type="button"
-          className="text-sm font-semibold text-slate-500"
-          onClick={() => onNavigate("login")}
-        >
+        <Link to="/login" className="text-sm font-semibold text-slate-500">
           Back to login
-        </button>
+        </Link>
       </div>
     </>
   );

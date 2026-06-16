@@ -1,9 +1,10 @@
+import { Link } from "react-router-dom";
 import Button from "../Elements/Button.jsx";
 import CheckBox from "../Elements/CheckBox.jsx";
 import LabeledInput from "../Elements/LabeledInput.jsx";
 import GoogleIcon from "../GoogleIcon.jsx";
 
-function FormSignIn({ errorMessage, notice, onNavigate, onSubmit }) {
+function FormSignIn({ errorMessage, notice, onSubmit }) {
   return (
     <>
       <form className="space-y-5" onSubmit={onSubmit}>
@@ -60,20 +61,18 @@ function FormSignIn({ errorMessage, notice, onNavigate, onSubmit }) {
       </Button>
 
       <div className="mt-8 flex items-center justify-center gap-4 text-sm">
-        <button
-          type="button"
+        <Link
+          to="/forgot-password"
           className="font-semibold text-slate-500"
-          onClick={() => onNavigate("forgot-password")}
         >
           Forgot password?
-        </button>
-        <button
-          type="button"
+        </Link>
+        <Link
+          to="/register"
           className="font-semibold text-teal-600"
-          onClick={() => onNavigate("sign-up")}
         >
           Create an account
-        </button>
+        </Link>
       </div>
     </>
   );

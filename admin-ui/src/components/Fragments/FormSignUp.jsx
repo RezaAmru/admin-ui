@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
 import Button from "../Elements/Button.jsx";
 import CheckBox from "../Elements/CheckBox.jsx";
 import LabeledInput from "../Elements/LabeledInput.jsx";
 
-function FormSignUp({ errorMessage, onNavigate, onSubmit }) {
+function FormSignUp({ errorMessage, onSubmit }) {
   return (
     <>
       <form className="space-y-5" onSubmit={onSubmit}>
@@ -53,13 +54,9 @@ function FormSignUp({ errorMessage, onNavigate, onSubmit }) {
       </form>
 
       <div className="mt-8 text-center">
-        <button
-          type="button"
-          className="text-sm font-semibold text-teal-600"
-          onClick={() => onNavigate("login")}
-        >
+        <Link to="/login" className="text-sm font-semibold text-teal-600">
           Back to login
-        </button>
+        </Link>
       </div>
     </>
   );

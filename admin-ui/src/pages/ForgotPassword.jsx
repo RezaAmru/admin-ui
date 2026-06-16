@@ -2,7 +2,7 @@ import { useState } from "react";
 import FormForgotPassword from "../components/Fragments/FormForgotPassword.jsx";
 import AuthLayout from "../components/Layouts/AuthLayout.jsx";
 
-function ForgotPassword({ onNavigate, users }) {
+function ForgotPassword({ users }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -34,7 +34,6 @@ function ForgotPassword({ onNavigate, users }) {
 
       <FormForgotPassword
         errorMessage={errorMessage}
-        onNavigate={onNavigate}
         onSubmit={handleSubmit}
         successMessage={successMessage}
       />

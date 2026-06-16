@@ -2,7 +2,7 @@ import { useState } from "react";
 import FormSignIn from "../components/Fragments/FormSignIn.jsx";
 import AuthLayout from "../components/Layouts/AuthLayout.jsx";
 
-function SignIn({ notice, onLogin, onNavigate, users }) {
+function SignIn({ notice, onLogin, users }) {
   const [errorMessage, setErrorMessage] = useState("");
 
   function handleSubmit(event) {
@@ -29,7 +29,6 @@ function SignIn({ notice, onLogin, onNavigate, users }) {
       <FormSignIn
         errorMessage={errorMessage}
         notice={notice}
-        onNavigate={onNavigate}
         onSubmit={handleSubmit}
       />
     </AuthLayout>
