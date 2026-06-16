@@ -1,20 +1,23 @@
-import { Link } from "react-router-dom";
-import {
-  BellIcon,
-  LogoutIcon,
-  MoreVerticalIcon,
-  OverviewIcon,
-  SearchIcon,
-  TransferIcon,
-  WalletIcon,
-} from "../Icons.jsx";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import { NavLink } from "react-router-dom";
+import { SearchIcon } from "../Icons.jsx";
 import Input from "../Elements/Input.jsx";
+import Icon from "../Elements/Icon.jsx";
 import Logo from "../Elements/Logo.jsx";
 
 const navigationItems = [
-  { label: "Overview", path: "/dashboard", Icon: OverviewIcon },
-  { label: "Balances", path: "/balances", Icon: WalletIcon },
-  { label: "Transactions", path: "/transactions", Icon: TransferIcon },
+  { id: 1, name: "Overview", icon: <Icon.Overview />, link: "/dashboard" },
+  { id: 2, name: "Balances", icon: <Icon.Balance />, link: "/balance" },
+  {
+    id: 3,
+    name: "Transactions",
+    icon: <Icon.Transaction />,
+    link: "/transaction",
+  },
+  { id: 4, name: "Bills", icon: <Icon.Bill />, link: "/bill" },
+  { id: 5, name: "Expenses", icon: <Icon.Expense />, link: "/expense" },
+  { id: 6, name: "Goals", icon: <Icon.Goal />, link: "/goal" },
+  { id: 7, name: "Settings", icon: <Icon.Setting />, link: "/setting" },
 ];
 
 function getFirstName(name) {
@@ -36,26 +39,24 @@ function MainLayout({ children, onLogout, user }) {
           <Logo variant="secondary" className="mb-10" />
 
           <nav className="space-y-2" aria-label="Main navigation">
-            {navigationItems.map((item, index) => {
-              const Icon = item.Icon;
-
-              return (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className={`flex rounded px-4 py-3 transition ${
-                    index === 0
-                      ? "bg-teal-600 text-white"
-                      : "hover:bg-neutral-800 hover:text-white"
-                  }`}
-                >
-                  <Icon className="mx-auto h-5 w-5 sm:mx-0" />
-                  <span className="ms-3 hidden text-sm font-medium sm:block">
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
+            {navigationItems.map((item) => (
+              <NavLink
+                key={item.id}
+                to={item.link}
+                className={({ isActive }) =>
+                  `flex rounded px-4 py-3 transition hover:scale-105 hover:text-white hover:font-bold ${
+                    isActive
+                      ? "bg-teal-600 text-white font-bold"
+                      : "hover:bg-neutral-800"
+                  }`
+                }
+              >
+                <span className="mx-auto sm:mx-0">{item.icon}</span>
+                <span className="ms-3 hidden text-sm font-medium sm:block">
+                  {item.name}
+                </span>
+              </NavLink>
+            ))}
           </nav>
         </div>
 
@@ -65,7 +66,9 @@ function MainLayout({ children, onLogout, user }) {
             className="flex w-full rounded bg-neutral-800 px-4 py-3 text-slate-200"
             onClick={onLogout}
           >
-            <LogoutIcon className="mx-auto h-5 w-5 sm:mx-0" />
+            <span className="mx-auto sm:mx-0">
+              <Icon.Logout />
+            </span>
             <span className="ms-3 hidden text-sm font-medium sm:block">
               Logout
             </span>
@@ -85,7 +88,10 @@ function MainLayout({ children, onLogout, user }) {
                 {profileEmail}
               </p>
             </div>
-            <MoreVerticalIcon className="hidden h-5 w-5 text-slate-500 sm:block" />
+            <Icon.Detail
+              className="hidden text-slate-500 sm:block"
+              size={20}
+            />
           </div>
         </div>
       </aside>
@@ -106,7 +112,7 @@ function MainLayout({ children, onLogout, user }) {
               aria-label="Notifications"
               className="grid h-10 w-10 place-items-center rounded-full bg-white text-slate-500 shadow-sm"
             >
-              <BellIcon className="h-5 w-5" />
+              <NotificationsNoneOutlinedIcon fontSize="small" />
             </button>
             <div className="hidden w-64 sm:block">
               <Input

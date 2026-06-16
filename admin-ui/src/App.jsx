@@ -7,6 +7,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
+import Balance from "./pages/balance.jsx";
 import Dashboard from "./pages/dashboard.jsx";
 import ErrorPage, { NotFoundPage } from "./pages/Error.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
@@ -147,6 +148,23 @@ function DashboardRoute() {
   );
 }
 
+function BalanceRoute() {
+  const { currentUser, logout, users } = useAuth();
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
+  return (
+    <Balance
+      onLogout={handleLogout}
+      user={currentUser ?? users[0]}
+    />
+  );
+}
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -172,6 +190,14 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <DashboardRoute />,
+  },
+  {
+    path: "/balance",
+    element: <BalanceRoute />,
+  },
+  {
+    path: "/balances",
+    element: <Navigate to="/balance" replace />,
   },
   {
     path: "/overview",
