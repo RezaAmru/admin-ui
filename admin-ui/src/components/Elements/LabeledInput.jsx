@@ -1,3 +1,5 @@
+import Input from "./Input.jsx";
+
 function LabeledInput({
   autoComplete,
   className = "",
@@ -16,14 +18,14 @@ function LabeledInput({
       >
         {label}
       </label>
-      <input
+      <Input
         id={id}
         name={name}
         type={type}
         placeholder={placeholder}
         autoComplete={autoComplete}
         {...props}
-        className={`w-full rounded border border-slate-400 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 ${className}`}
+        className={className}
       />
     </div>
   );

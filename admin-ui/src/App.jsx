@@ -7,9 +7,9 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
+import Dashboard from "./pages/dashboard.jsx";
 import ErrorPage, { NotFoundPage } from "./pages/Error.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
-import Overview from "./pages/Overview.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import { users as seededUsers } from "./seeders/users.js";
@@ -18,7 +18,7 @@ const legacyPagePaths = {
   login: "/login",
   "sign-up": "/register",
   "forgot-password": "/forgot-password",
-  overview: "/overview",
+  overview: "/dashboard",
 };
 
 const AuthContext = createContext(null);
@@ -106,7 +106,7 @@ function SignInRoute() {
 
   function handleLogin(user) {
     login(user);
-    navigate("/overview");
+    navigate("/dashboard");
   }
 
   return <SignIn notice={authNotice} onLogin={handleLogin} users={users} />;
@@ -130,7 +130,7 @@ function ForgotPasswordRoute() {
   return <ForgotPassword users={users} />;
 }
 
-function OverviewRoute() {
+function DashboardRoute() {
   const { currentUser, logout, users } = useAuth();
   const navigate = useNavigate();
 
@@ -140,7 +140,7 @@ function OverviewRoute() {
   }
 
   return (
-    <Overview
+    <Dashboard
       onLogout={handleLogout}
       user={currentUser ?? users[0]}
     />
@@ -170,8 +170,12 @@ const router = createBrowserRouter([
     element: <ForgotPasswordRoute />,
   },
   {
+    path: "/dashboard",
+    element: <DashboardRoute />,
+  },
+  {
     path: "/overview",
-    element: <OverviewRoute />,
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     path: "*",
