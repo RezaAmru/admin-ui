@@ -1,12 +1,15 @@
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { SearchIcon } from "../Icons.jsx";
 import Input from "../Elements/Input.jsx";
 import Icon from "../Elements/Icon.jsx";
 import Logo from "../Elements/Logo.jsx";
+import { useAuth } from "../../context/authContext.jsx";
+import { useTheme } from "../../context/themeContext.jsx";
+import { logoutService } from "../../services/authService.jsx";
 
 const navigationItems = [
-  { id: 1, name: "Overview", icon: <Icon.Overview />, link: "/dashboard" },
+  { id: 1, name: "Overview", icon: <Icon.Overview />, link: "/", end: true },
   { id: 2, name: "Balances", icon: <Icon.Balance />, link: "/balance" },
   {
     id: 3,
@@ -29,11 +32,35 @@ function getInitial(name) {
 }
 
 function MainLayout({ children, onLogout, user }) {
-  const profileName = user?.name ?? "Tanzir Rahman";
-  const profileEmail = user?.email ?? "View Profile";
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const { setTheme, theme, themes } = useTheme();
+  const currentUser = user ?? auth.user;
+  const profileName =
+    currentUser?.name ?? currentUser?.email ?? "Finebank User";
+  const profileEmail = currentUser?.email ?? "View Profile";
+  const currentDate = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+
+  async function handleLogout() {
+    try {
+      await logoutService();
+    } catch (error) {
+      if (error?.status !== 401) {
+        // Local logout still keeps the UI consistent when the API is unreachable.
+      }
+    } finally {
+      auth.logout();
+      onLogout?.();
+      navigate("/login", { replace: true });
+    }
+  }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-900">
+    <div className={`${theme.name} flex min-h-screen bg-slate-100 text-slate-900`}>
       <aside className="flex w-28 shrink-0 flex-col justify-between bg-neutral-950 px-4 py-7 text-slate-400 sm:w-64 sm:px-5">
         <div>
           <Logo variant="secondary" className="mb-10" />
@@ -42,11 +69,12 @@ function MainLayout({ children, onLogout, user }) {
             {navigationItems.map((item) => (
               <NavLink
                 key={item.id}
+                end={item.end}
                 to={item.link}
                 className={({ isActive }) =>
                   `flex rounded px-4 py-3 transition hover:scale-105 hover:text-white hover:font-bold ${
                     isActive
-                      ? "bg-teal-600 text-white font-bold"
+                      ? "bg-primary text-white font-bold"
                       : "hover:bg-neutral-800"
                   }`
                 }
@@ -58,13 +86,35 @@ function MainLayout({ children, onLogout, user }) {
               </NavLink>
             ))}
           </nav>
+
+          <div className="mt-8 hidden sm:block">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-normal text-slate-500">
+              Accent
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {themes.map((item) => (
+                <button
+                  aria-label={`Use ${item.label} theme`}
+                  className={`h-6 w-6 cursor-pointer rounded-full border-2 transition hover:scale-110 ${
+                    theme.name === item.name
+                      ? "border-white"
+                      : "border-transparent"
+                  }`}
+                  key={item.name}
+                  onClick={() => setTheme(item)}
+                  style={{ backgroundColor: item.color }}
+                  type="button"
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div>
           <button
             type="button"
-            className="flex w-full rounded bg-neutral-800 px-4 py-3 text-slate-200"
-            onClick={onLogout}
+            className="flex w-full cursor-pointer rounded bg-neutral-800 px-4 py-3 text-slate-200 transition hover:scale-105 hover:text-white"
+            onClick={handleLogout}
           >
             <span className="mx-auto sm:mx-0">
               <Icon.Logout />
@@ -77,7 +127,7 @@ function MainLayout({ children, onLogout, user }) {
           <div className="my-10 border-b border-neutral-800" />
 
           <div className="flex items-center justify-between gap-3">
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-teal-600 text-sm font-bold text-white">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">
               {getInitial(profileName)}
             </div>
             <div className="hidden min-w-0 flex-1 sm:block">
@@ -103,7 +153,7 @@ function MainLayout({ children, onLogout, user }) {
               Hello {getFirstName(profileName)}
             </h1>
             <span className="text-slate-300">|</span>
-            <p className="text-sm text-slate-500">May 19, 2023</p>
+            <p className="text-sm text-slate-500">{currentDate}</p>
           </div>
 
           <div className="flex items-center gap-4">

@@ -1,8 +1,8 @@
 import MainLayout from "../components/Layouts/MainLayout.jsx";
 
-function Balance({ onLogout, user }) {
+function Balance() {
   return (
-    <MainLayout onLogout={onLogout} user={user}>
+    <MainLayout>
       <div className="rounded bg-white p-6 text-slate-700 shadow-sm">
         Test Balance Page
       </div>

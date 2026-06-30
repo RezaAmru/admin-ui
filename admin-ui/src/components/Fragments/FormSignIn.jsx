@@ -1,49 +1,102 @@
+import { ErrorMessage, Field, Form, Formik } from "formik";
 import { Link } from "react-router-dom";
+import * as Yup from "yup";
 import Button from "../Elements/Button.jsx";
 import CheckBox from "../Elements/CheckBox.jsx";
 import LabeledInput from "../Elements/LabeledInput.jsx";
 import GoogleIcon from "../GoogleIcon.jsx";
 
+const SignInSchema = Yup.object().shape({
+  email: Yup.string().email("Email tidak valid").required("Email wajib diisi"),
+  password: Yup.string().required("Password wajib diisi"),
+});
+
 function FormSignIn({ errorMessage, notice, onSubmit }) {
   return (
     <>
-      <form className="space-y-5" onSubmit={onSubmit}>
-        <LabeledInput
-          id="email"
-          name="email"
-          type="email"
-          label="Email address"
-          placeholder="hello@example.com"
-          autoComplete="email"
-          required
-        />
+      <Formik
+        initialValues={{ email: "", password: "", status: false }}
+        onSubmit={async (values, { setSubmitting }) => {
+          try {
+            await onSubmit(values.email, values.password);
+          } finally {
+            setSubmitting(false);
+          }
+        }}
+        validationSchema={SignInSchema}
+      >
+        {({ isSubmitting }) => (
+          <Form className="space-y-5" noValidate>
+            <div>
+              <Field name="email">
+                {({ field }) => (
+                  <LabeledInput
+                    {...field}
+                    autoComplete="email"
+                    id="email"
+                    label="Email address"
+                    placeholder="hello@example.com"
+                    type="email"
+                  />
+                )}
+              </Field>
+              <ErrorMessage
+                className="mt-2 text-sm text-red-600"
+                component="p"
+                name="email"
+              />
+            </div>
 
-        <LabeledInput
-          id="password"
-          name="password"
-          type="password"
-          label="Password"
-          placeholder="********"
-          autoComplete="current-password"
-          required
-        />
+            <div>
+              <Field name="password">
+                {({ field }) => (
+                  <LabeledInput
+                    {...field}
+                    autoComplete="current-password"
+                    id="password"
+                    label="Password"
+                    placeholder="********"
+                    type="password"
+                  />
+                )}
+              </Field>
+              <ErrorMessage
+                className="mt-2 text-sm text-red-600"
+                component="p"
+                name="password"
+              />
+            </div>
 
-        {notice && (
-          <p className="rounded border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-700">
-            {notice}
-          </p>
+            {notice && (
+              <p className="rounded border border-teal-200 bg-teal-50 px-3 py-2 text-sm text-teal-700">
+                {notice}
+              </p>
+            )}
+
+            {errorMessage && (
+              <p className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errorMessage}
+              </p>
+            )}
+
+            <Field name="status">
+              {({ field }) => (
+                <CheckBox
+                  checked={field.value}
+                  id="remember-me"
+                  label="Keep me signed in"
+                  name={field.name}
+                  onChange={field.onChange}
+                />
+              )}
+            </Field>
+
+            <Button disabled={isSubmitting}>
+              {isSubmitting ? "Loading..." : "Login"}
+            </Button>
+          </Form>
         )}
-
-        {errorMessage && (
-          <p className="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {errorMessage}
-          </p>
-        )}
-
-        <CheckBox id="remember-me" name="rememberMe" label="Keep me signed in" />
-
-        <Button>Login</Button>
-      </form>
+      </Formik>
 
       <div className="my-7 flex items-center gap-4">
         <span className="h-px flex-1 bg-slate-300" />

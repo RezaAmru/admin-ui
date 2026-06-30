@@ -1,9 +1,9 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { useState } from "react";
 import {
   createBrowserRouter,
-  Link,
   Navigate,
   RouterProvider,
+  useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
@@ -13,162 +13,111 @@ import ErrorPage, { NotFoundPage } from "./pages/Error.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import SignIn from "./pages/SignIn.jsx";
 import SignUp from "./pages/SignUp.jsx";
+import { useAuth } from "./context/authContext.jsx";
 import { users as seededUsers } from "./seeders/users.js";
 
 const legacyPagePaths = {
   login: "/login",
   "sign-up": "/register",
   "forgot-password": "/forgot-password",
-  overview: "/dashboard",
+  overview: "/",
 };
 
-const AuthContext = createContext(null);
+function RequireAuth({ children }) {
+  const { user } = useAuth();
+  const location = useLocation();
 
-function AuthProvider({ children }) {
-  const [users, setUsers] = useState(seededUsers);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authNotice, setAuthNotice] = useState("");
-
-  const authValue = useMemo(
-    () => ({
-      authNotice,
-      currentUser,
-      users,
-      login(user) {
-        setCurrentUser(user);
-        setAuthNotice("");
-      },
-      logout() {
-        setCurrentUser(null);
-        setAuthNotice("You have signed out.");
-      },
-      signUp(newUser) {
-        setUsers((currentUsers) => [
-          ...currentUsers,
-          {
-            ...newUser,
-            id: crypto.randomUUID(),
-            role: "member",
-          },
-        ]);
-        setAuthNotice("Account created. Sign in with your new email.");
-      },
-    }),
-    [authNotice, currentUser, users],
-  );
-
-  return (
-    <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
-  );
-}
-
-function useAuth() {
-  const auth = useContext(AuthContext);
-
-  if (!auth) {
-    throw new Error("useAuth must be used within AuthProvider.");
+  if (!user) {
+    return <Navigate replace state={{ from: location }} to="/login" />;
   }
 
-  return auth;
+  return children;
 }
 
-function HomePage() {
+function NotRequireAuth({ children }) {
+  const { user } = useAuth();
+
+  if (user) {
+    return <Navigate replace to="/" />;
+  }
+
+  return children;
+}
+
+function RootRoute() {
   const [searchParams] = useSearchParams();
   const legacyPage = searchParams.get("page");
 
   if (legacyPage) {
-    return <Navigate to={legacyPagePaths[legacyPage] ?? "/login"} replace />;
+    return <Navigate replace to={legacyPagePaths[legacyPage] ?? "/login"} />;
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
-      <div className="flex items-center gap-4">
-        <Link
-          to="/login"
-          className="rounded bg-teal-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
-        >
-          Login
-        </Link>
-        <span className="text-slate-400">|</span>
-        <Link
-          to="/register"
-          className="rounded bg-teal-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-teal-700"
-        >
-          Register
-        </Link>
-      </div>
-    </main>
+    <RequireAuth>
+      <Dashboard />
+    </RequireAuth>
   );
 }
 
 function SignInRoute() {
-  const { authNotice, login, users } = useAuth();
-  const navigate = useNavigate();
-
-  function handleLogin(user) {
-    login(user);
-    navigate("/dashboard");
-  }
-
-  return <SignIn notice={authNotice} onLogin={handleLogin} users={users} />;
+  return (
+    <NotRequireAuth>
+      <SignIn />
+    </NotRequireAuth>
+  );
 }
 
 function SignUpRoute() {
-  const { signUp, users } = useAuth();
+  const [users, setUsers] = useState(seededUsers);
   const navigate = useNavigate();
 
   function handleSignUp(newUser) {
-    signUp(newUser);
-    navigate("/login");
-  }
-
-  return <SignUp onSignUp={handleSignUp} users={users} />;
-}
-
-function ForgotPasswordRoute() {
-  const { users } = useAuth();
-
-  return <ForgotPassword users={users} />;
-}
-
-function DashboardRoute() {
-  const { currentUser, logout, users } = useAuth();
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    logout();
+    setUsers((currentUsers) => [
+      ...currentUsers,
+      {
+        ...newUser,
+        id: crypto.randomUUID(),
+        role: "member",
+      },
+    ]);
     navigate("/login");
   }
 
   return (
-    <Dashboard
-      onLogout={handleLogout}
-      user={currentUser ?? users[0]}
-    />
+    <NotRequireAuth>
+      <SignUp onSignUp={handleSignUp} users={users} />
+    </NotRequireAuth>
+  );
+}
+
+function ForgotPasswordRoute() {
+  return (
+    <NotRequireAuth>
+      <ForgotPassword users={seededUsers} />
+    </NotRequireAuth>
+  );
+}
+
+function DashboardRedirectRoute() {
+  return (
+    <RequireAuth>
+      <Navigate replace to="/" />
+    </RequireAuth>
   );
 }
 
 function BalanceRoute() {
-  const { currentUser, logout, users } = useAuth();
-  const navigate = useNavigate();
-
-  function handleLogout() {
-    logout();
-    navigate("/login");
-  }
-
   return (
-    <Balance
-      onLogout={handleLogout}
-      user={currentUser ?? users[0]}
-    />
+    <RequireAuth>
+      <Balance />
+    </RequireAuth>
   );
 }
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomePage />,
+    element: <RootRoute />,
     errorElement: <ErrorPage />,
   },
   {
@@ -181,7 +130,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/sign-up",
-    element: <Navigate to="/register" replace />,
+    element: <Navigate replace to="/register" />,
   },
   {
     path: "/forgot-password",
@@ -189,7 +138,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <DashboardRoute />,
+    element: <DashboardRedirectRoute />,
   },
   {
     path: "/balance",
@@ -197,11 +146,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/balances",
-    element: <Navigate to="/balance" replace />,
+    element: (
+      <RequireAuth>
+        <Navigate replace to="/balance" />
+      </RequireAuth>
+    ),
   },
   {
     path: "/overview",
-    element: <Navigate to="/dashboard" replace />,
+    element: <DashboardRedirectRoute />,
   },
   {
     path: "*",
@@ -210,11 +163,7 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

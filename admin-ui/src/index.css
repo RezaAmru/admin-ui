@@ -1,7 +1,29 @@
 @import "tailwindcss";
 
 @theme {
+  --color-primary: #299d91;
   --color-special-red-2: #b83016;
+}
+
+:root,
+.theme-green {
+  --color-primary: #299d91;
+}
+
+.theme-blue {
+  --color-primary: #1e90ff;
+}
+
+.theme-purple {
+  --color-primary: #6a5acd;
+}
+
+.theme-pink {
+  --color-primary: #db7093;
+}
+
+.theme-brown {
+  --color-primary: #8b4513;
 }
 
 body {

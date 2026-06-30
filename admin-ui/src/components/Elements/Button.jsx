@@ -1,5 +1,5 @@
 const baseClasses =
-  "w-full rounded px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full cursor-pointer rounded px-4 py-3 text-sm font-semibold transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60";
 
 const variantClasses = {
   primary: "bg-teal-600 text-white hover:bg-teal-700",

@@ -7,7 +7,7 @@ function Input({
   wrapperClassName = "",
   ...props
 }) {
-  const inputClasses = `w-full rounded border px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-100 ${
+  const inputClasses = `w-full rounded border px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 ${
     icon ? "pr-10" : ""
   } ${border} ${backgroundColor} ${className}`;
 

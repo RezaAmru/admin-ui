@@ -8,7 +8,7 @@ function Card({ children, desc, link = false, title }) {
         {link && (
           <Link
             to={link}
-            className="shrink-0 text-xs font-semibold text-teal-600"
+            className="shrink-0 text-xs font-semibold text-primary"
           >
             View All
           </Link>

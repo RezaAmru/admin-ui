@@ -1,36 +1,102 @@
-import Card from "../components/Elements/Card.jsx";
+import { useEffect, useState } from "react";
+import AppSnackbar from "../components/Elements/AppSnackbar.jsx";
+import CardBalance from "../components/Fragments/CardBalance.jsx";
+import CardExpenseBreakdown from "../components/Fragments/CardExpenseBreakdown.jsx";
+import CardGoal from "../components/Fragments/CardGoal.jsx";
+import CardRecentTransaction from "../components/Fragments/CardRecentTransaction.jsx";
+import CardStatistic from "../components/Fragments/CardStatistic.jsx";
+import CardUpcomingBill from "../components/Fragments/CardUpcomingBill.jsx";
 import MainLayout from "../components/Layouts/MainLayout.jsx";
+import { useAuth } from "../context/authContext.jsx";
+import { goalService } from "../services/dataService.jsx";
+import { useNavigate } from "react-router-dom";
 
-const description =
-  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nisi, autem porro asperiores numquam sed veritatis debitis beatae amet laboriosam fuga pariatur sapiente suscipit culpa facere voluptatem.";
+function Dashboard() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  const [goals, setGoals] = useState({});
+  const [isGoalsLoading, setIsGoalsLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState({
+    message: "",
+    open: false,
+    severity: "error",
+  });
 
-function Dashboard({ onLogout, user }) {
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchGoals() {
+      try {
+        const data = await goalService();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setGoals(
+          Object.keys(data).length > 0
+            ? data
+            : { present_amount: 0, target_amount: 0 },
+        );
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setSnackbar({
+          message: error?.msg || "Gagal mengambil data goals",
+          open: true,
+          severity: "error",
+        });
+        setGoals({ present_amount: 0, target_amount: 0 });
+
+        if (error?.status === 401) {
+          logout();
+          navigate("/login", { replace: true });
+        }
+      } finally {
+        if (isMounted) {
+          setIsGoalsLoading(false);
+        }
+      }
+    }
+
+    fetchGoals();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [logout, navigate]);
+
   return (
-    <MainLayout onLogout={onLogout} user={user}>
-      <div className="grid min-h-full auto-rows-fr gap-6 sm:grid-cols-12 sm:grid-rows-3">
-        <div className="sm:col-span-4">
-          <Card title="Total Balance" desc={description} />
+    <MainLayout>
+      <div className="grid gap-6 xl:grid-cols-12">
+        <div className="xl:col-span-4">
+          <CardBalance />
         </div>
-        <div className="sm:col-span-4">
-          <Card title="Goals" desc={description} />
+        <div className="xl:col-span-4">
+          <CardGoal data={goals} isLoading={isGoalsLoading} />
         </div>
-        <div className="sm:col-span-4">
-          <Card title="Upcoming Bill" link="/bill" desc={description} />
+        <div className="xl:col-span-4">
+          <CardUpcomingBill />
         </div>
-        <div className="sm:col-span-4 sm:row-span-2">
-          <Card
-            title="Recent Transactions"
-            link="/transactions"
-            desc={description}
-          />
+        <div className="xl:col-span-4 xl:row-span-2">
+          <CardRecentTransaction />
         </div>
-        <div className="sm:col-span-8">
-          <Card title="Statistics" desc={description} />
+        <div className="xl:col-span-8">
+          <CardStatistic />
         </div>
-        <div className="sm:col-span-8">
-          <Card title="Expenses Breakdown" desc={description} />
+        <div className="xl:col-span-8">
+          <CardExpenseBreakdown />
         </div>
       </div>
+
+      <AppSnackbar
+        message={snackbar.message}
+        onClose={() => setSnackbar((current) => ({ ...current, open: false }))}
+        open={snackbar.open}
+        severity={snackbar.severity}
+      />
     </MainLayout>
   );
 }
